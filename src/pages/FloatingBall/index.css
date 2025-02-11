@@ -1,0 +1,11 @@
+.search-icon {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  transition: opacity 0.3s ease;
+}
+
+.search-icon:hover {
+  opacity: 0.5; /* 悬停时改变透明度 */
+}
