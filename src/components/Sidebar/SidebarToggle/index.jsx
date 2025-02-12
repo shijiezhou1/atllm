@@ -12,9 +12,10 @@ const SIDEBAR_TOGGLE_STORAGE_KEY = "anythingllm_sidebar_toggle";
  * @returns {boolean}
  */
 function previousSidebarState() {
-  const previousState = window.localStorage.getItem(SIDEBAR_TOGGLE_STORAGE_KEY);
-  if (previousState === "closed") return false;
-  return true;
+  return false;
+  // const previousState = window.localStorage.getItem(SIDEBAR_TOGGLE_STORAGE_KEY);
+  // if (previousState === "closed") return false;
+  // return true;
 }
 
 export function useSidebarToggle() {
@@ -75,7 +76,7 @@ export function ToggleSidebarButton({ showSidebar, setShowSidebar }) {
     <>
       <button
         type="button"
-        className={`hidden md:block border-none bg-transparent outline-none ring-0 transition-left duration-500 ${showSidebar ? "left-[247px]" : "absolute top-[20px] left-[30px] z-10"}`}
+        className={`border-none bg-transparent outline-none ring-0 transition-left duration-500 ${showSidebar ? "left-0" : "absolute top-[20px] left-[30px] z-10"}`}
         onClick={() => setShowSidebar((prev) => !prev)}
         data-tooltip-id="sidebar-toggle"
         data-tooltip-content={

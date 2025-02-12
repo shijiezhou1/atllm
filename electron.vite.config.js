@@ -18,7 +18,7 @@ console.log(resolve(__dirname, "index.html"))
 export default defineConfig({
   main: {
     // vite config options
-    plugins: [externalizeDepsPlugin()],
+    plugins: [react(),externalizeDepsPlugin()],
     build: {
       rollupOptions: {
         input: {
@@ -65,7 +65,7 @@ export default defineConfig({
   },
   preload: {
     // vite config options
-    plugins: [externalizeDepsPlugin()],
+    plugins: [react(),externalizeDepsPlugin()],
     build: {
       rollupOptions: {
         input: {
@@ -101,7 +101,7 @@ export default defineConfig({
   renderer: {
     // vite config options,
     root: ".",
-    plugins: [externalizeDepsPlugin()],
+    plugins: [react(),externalizeDepsPlugin()],
     build: {
       rollupOptions: {
         input: {

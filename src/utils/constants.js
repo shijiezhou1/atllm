@@ -1,4 +1,8 @@
 export const API_BASE = import.meta.env.VITE_API_BASE || "/api";
+
+// TODO:hardcode
+export const API_KEY = import.meta.env.VITE_API_BROWSER_API_KEY || "xxx"
+
 export const ONBOARDING_SURVEY_URL = "https://onboarding.anythingllm.com";
 
 export const AUTH_USER = "anythingllm_user";
@@ -50,3 +54,14 @@ export function fullApiUrl() {
 }
 
 export const POPUP_BROWSER_EXTENSION_EVENT = "NEW_BROWSER_EXTENSION_CONNECTION";
+
+
+export const CHANNELS = {
+  navigateTo: "navigateTo",
+  createSuspensionMenu:"createSuspensionMenu",
+  triggerNotify:"triggerNotify",
+  copyText:"copyText",
+  copyTextReply:"copyTextReply",
+  suspensionWindowMove: "suspensionWindowMove",
+  focusHomeWindow:"focusHomeWindow"
+}

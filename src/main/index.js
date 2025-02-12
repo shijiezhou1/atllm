@@ -1,3 +1,4 @@
+import { CHANNELS } from "@/utils/constants";
 import {
   app,
   shell,
@@ -10,23 +11,33 @@ import {
 import { join } from "path";
 const { electronApp, optimizer, is } = require("@electron-toolkit/utils");
 
-const pages = {
-  floatingWindow: undefined,
-  homeWindow: undefined,
-};
+if (process.platform === 'darwin') {
+  if (process.arch === 'x64') {
+    console.log('Disabling hardware acceleration on Intel-based Mac');
+    app.disableHardwareAcceleration();
+  } else {
+    console.log('Running on Apple Silicon (M1/M2), hardware acceleration is enabled');
+  } 
+}
+const pages = Object.seal({
+  floatingWindow: null,
+  homeWindow: null,
+});
+
+let lastCopiedText = '';
 
 const createWindow = () => {
   const win = new BrowserWindow({
-    width: 1000,
+    width: 500,
     height: 600,
     webPreferences: {
-      nodeIntegration: false,
+      nodeIntegration: true,
       contextIsolation: true,
       enableRemoteModule: true,
-      webSecurity: true,
+      webSecurity: false,
       preload: join(__dirname, "../preload/index.mjs"),
       sandbox: false,
-      allowRunningInsecureContent: false,
+      // allowRunningInsecureContent: false,
     },
   });
 
@@ -38,6 +49,7 @@ const createWindow = () => {
   if (is.dev && process.env["ELECTRON_RENDERER_URL"]) {
     win.loadURL(process.env["ELECTRON_RENDERER_URL"] + "/workspace/test");
   } else {
+    // win.loadFile("./dist/_index.html");
     win.loadFile(join(__dirname, "../index.html"));
   }
 
@@ -45,10 +57,10 @@ const createWindow = () => {
 };
 
 const createFloatingWindow = () => {
-  const suspensionConfig = {
+  const suspensionConfig = Object.freeze({
     width: 80,
     height: 40,
-  };
+  });
 
   const win = new BrowserWindow({
     width: suspensionConfig.width,
@@ -62,7 +74,7 @@ const createFloatingWindow = () => {
     ...(process.platform === "linux" ? { icon } : {}),
     webPreferences: {
       nodeIntegration: true,
-      contextIsolation: false,
+      contextIsolation: true,
       enableRemoteModule: true,
       webSecurity: false,
       preload: join(__dirname, "../preload/index.mjs"),
@@ -81,9 +93,11 @@ const createFloatingWindow = () => {
 
   // HMR for renderer base on electron-vite cli.
   // Load the remote URL for development or the local html file for production.
+
   if (is.dev && process.env["ELECTRON_RENDERER_URL"]) {
     win.loadURL(process.env["ELECTRON_RENDERER_URL"] + "/floatingball");
   } else {
+    // win.loadFile("./dist/_index.html");
     win.loadFile(join(__dirname, "../renderer/index.html"));
   }
 
@@ -101,9 +115,14 @@ const initHomePageSetting = (pages) => {
   pages.homeWindow = createWindow();
   pages.homeWindow.focus();
 
-  ipcMain.on("navigateTo", (event, route) => {
+  ipcMain.on(CHANNELS.focusHomeWindow, ()=>{
+    pages.homeWindow.focus();
+  })
+
+  ipcMain.on(CHANNELS.navigateTo, (event, route) => {
+ 
     let currentURL = pages.homeWindow.webContents.getURL();
-    console.log({ currentURL });
+    // console.log({ currentURL });
     if (currentURL.includes("/workspace/test")) {
       return;
     }
@@ -122,7 +141,7 @@ const initHomePageSetting = (pages) => {
 
   let suspensionMenu = null; //悬浮球右击菜单
   //创建悬浮球右击菜单
-  ipcMain.on("createSuspensionMenu", (e) => {
+  ipcMain.on(CHANNELS.createSuspensionMenu, (e) => {
     if (!suspensionMenu) {
       suspensionMenu = Menu.buildFromTemplate([
         {
@@ -133,10 +152,10 @@ const initHomePageSetting = (pages) => {
             }
           },
         },
-        {
-          label: "上传复制文字",
-          click: () => {},
-        },
+        // {
+        //   label: "上传复制文字",
+        //   click: () => {},
+        // },
         {
           label: "关闭悬浮球",
           click: () => {
@@ -157,9 +176,26 @@ const initHomePageSetting = (pages) => {
   });
 
   // 监听来自渲染进程的消息
-  ipcMain.on("trigger-notify", (event, message) => {
+  ipcMain.on(CHANNELS.triggerNotify, (event, message) => {
     // 将消息发送到第二个窗口
     pages.homeWindow.webContents.send("notify", message);
+  });
+
+
+  ipcMain.on(CHANNELS.copyText, (event, data) => {
+    
+    const text = clipboard.readText();
+    if (text === lastCopiedText) return;
+    event.sender.send(CHANNELS.copyTextReply, text);
+    
+    lastCopiedText = text;
+    console.log('🍎🍎🍎',lastCopiedText)
+    
+    if (pages.homeWindow === null) {
+      initHomePageSetting(pages);
+    } else {
+      pages.homeWindow.focus();
+    }
   });
 
   pages.homeWindow.on("close", (e, data) => {
@@ -179,20 +215,11 @@ app.whenReady().then(() => {
   pages.floatingWindow = createFloatingWindow();
 
   // TODO: debug mode
+  // pages.homeWindow.webContents.openDevTools({ mode: "detach" });
   // pages.floatingWindow.webContents.openDevTools({ mode: "detach" });
 
-  ipcMain.on("suspensionWindowMove", (event, message) => {
+  ipcMain.on(CHANNELS.suspensionWindowMove, (event, message) => {
     pages.floatingWindow.setPosition(message.x, message.y);
-  });
-
-  ipcMain.on("copyText", (event, data) => {
-    const text = clipboard.readText();
-    console.log({ copyText: text });
-    if (pages.homeWindow === null) {
-      initHomePageSetting(pages);
-    } else {
-      pages.homeWindow.focus();
-    }
   });
 
   pages.floatingWindow.on("close", (e, data) => {
