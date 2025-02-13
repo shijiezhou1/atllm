@@ -8,6 +8,7 @@ import {
   AUTH_TOKEN,
   AUTH_USER,
   CHANNELS,
+  CUR_COPY_TEXT,
 } from '@/utils/constants';
 import './index.css';
 import { useState } from 'react';
@@ -80,6 +81,8 @@ export default function FloatingBall() {
       // TODO: make the api call and set back loader after finish
       console.log({arg});
 
+      window.localStorage.setItem(CUR_COPY_TEXT, ""); // Clear copy text
+
       const { data } = await BrowserExtensionApiKey.checkApiKey(API_KEY);
       const { apiKeyId, connected, workspaces } = data;
       console.log(apiKeyId, connected, workspaces[0].id);
@@ -87,6 +90,11 @@ export default function FloatingBall() {
       const embedData = await BrowserExtensionApiKey.embedToWorkspace(API_KEY, workspaces[0].id, arg, "xxx", "xxx");
       if (embedData.error === null) {
         setIsLoading(false);
+
+        const route = '/workspace/test';
+        send(CHANNELS.navigateTo, {route});
+
+        window.localStorage.setItem(CUR_COPY_TEXT, arg);
       }
       
     });
@@ -95,9 +103,8 @@ export default function FloatingBall() {
   const handleSearchClicked = () => {
     // http://localhost:5173/workspace/test
     send(CHANNELS.copyText);
-    const route = '/workspace/test';
-    send(CHANNELS.navigateTo, route);
-    send(CHANNELS.triggerNotify, 'Hello from the first window!');
+    
+    // send(CHANNELS.triggerNotify, 'Hello from the first window!');
   };
 
   const handleFocusHomePage = () => {

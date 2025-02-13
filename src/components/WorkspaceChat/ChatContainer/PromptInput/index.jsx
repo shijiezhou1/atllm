@@ -17,6 +17,7 @@ import AttachmentManager from "./Attachments";
 import AttachItem from "./AttachItem";
 import { PASTE_ATTACHMENT_EVENT } from "../DnDWrapper";
 import useTextSize from "@/hooks/useTextSize";
+import { CHANNELS, CUR_COPY_TEXT } from "@/utils/constants";
 
 export const PROMPT_INPUT_EVENT = "set_prompt_input";
 const MAX_EDIT_STACK_SIZE = 100;
@@ -39,6 +40,8 @@ export default function PromptInput({
   const redoStack = useRef([]);
   const { textSizeClass } = useTextSize();
 
+  // const [copiedTxt, setCopiedTxt] = useState("");
+
   /**
    * To prevent too many re-renders we remotely listen for updates from the parent
    * via an event cycle. Otherwise, using message as a prop leads to a re-render every
@@ -59,6 +62,21 @@ export default function PromptInput({
       window.addEventListener(PROMPT_INPUT_EVENT, handlePromptUpdate);
     return () =>
       window?.removeEventListener(PROMPT_INPUT_EVENT, handlePromptUpdate);
+  }, []);
+
+
+  // TODO: fetch the copy text
+  const [curCopyText, setCurCopyText] = useState(window.localStorage.getItem(CUR_COPY_TEXT));
+
+  useEffect(() => {
+    const handleStorageChange = () => {
+      setCurCopyText(window.localStorage.getItem(CUR_COPY_TEXT));
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+    };
   }, []);
 
   useEffect(() => {
@@ -254,6 +272,23 @@ export default function PromptInput({
         <div className="flex items-center rounded-lg md:mb-4">
           <div className="w-[95vw] md:w-[635px] bg-theme-bg-chat-input light:bg-white light:border-solid light:border-[1px] light:border-theme-chat-input-border shadow-sm rounded-2xl flex flex-col px-4 overflow-hidden">
             <AttachmentManager attachments={attachments} />
+            {curCopyText && (
+              <div className="border border-gray-300 rounded-md m-1 p-1 relative">
+                <button
+                  onClick={() => {
+                    // TODO: clear text and clear localstorage text
+                    setCurCopyText("");
+                    window.localStorage.setItem(CUR_COPY_TEXT, "");
+                  }}
+                  className="absolute top-0 right-1 text-gray-500 hover:text-gray-700"
+                  aria-label="Close"
+                >
+                  &times;
+                </button>
+                <div className="text-xs">Text from your copied: </div>
+                <div className="text-gray-400 text-xs">{curCopyText}</div>
+              </div>
+            )}
             <div className="flex items-center w-full border-b-2 border-theme-chat-input-border">
               <textarea
                 ref={textareaRef}

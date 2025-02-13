@@ -17,7 +17,7 @@ if (process.platform === 'darwin') {
     app.disableHardwareAcceleration();
   } else {
     console.log('Running on Apple Silicon (M1/M2), hardware acceleration is enabled');
-  } 
+  }
 }
 const pages = Object.seal({
   floatingWindow: null,
@@ -113,30 +113,38 @@ const createFloatingWindow = () => {
 
 const initHomePageSetting = (pages) => {
   pages.homeWindow = createWindow();
+  pages.homeWindow.show();
   pages.homeWindow.focus();
 
-  ipcMain.on(CHANNELS.focusHomeWindow, ()=>{
+  ipcMain.on(CHANNELS.focusHomeWindow, () => {
+    pages.homeWindow.show();
     pages.homeWindow.focus();
   })
 
-  ipcMain.on(CHANNELS.navigateTo, (event, route) => {
- 
+  ipcMain.on(CHANNELS.navigateTo, (event, {route}) => {
+    pages.homeWindow.show();
+    pages.homeWindow.focus();
+
     let currentURL = pages.homeWindow.webContents.getURL();
     // console.log({ currentURL });
     if (currentURL.includes("/workspace/test")) {
       return;
     }
-    if (pages.homeWindow) {
-      if (is.dev && process.env["ELECTRON_RENDERER_URL"]) {
-        pages.homeWindow.loadURL(
-          `${process.env["ELECTRON_RENDERER_URL"]}${route}`
-        );
-      } else {
-        pages.homeWindow.loadFile(path.join(__dirname, "../index.html"), {
-          hash: route,
-        });
-      }
+
+    if (!pages?.homeWindow) {
+      return
     }
+
+    if (is.dev && process.env["ELECTRON_RENDERER_URL"]) {
+      pages.homeWindow.loadURL(
+        `${process.env["ELECTRON_RENDERER_URL"]}${route}`
+      );
+    } else {
+      pages.homeWindow.loadFile(path.join(__dirname, "../index.html"), {
+        hash: route,
+      });
+    }
+
   });
 
   let suspensionMenu = null; //悬浮球右击菜单
@@ -183,18 +191,16 @@ const initHomePageSetting = (pages) => {
 
 
   ipcMain.on(CHANNELS.copyText, (event, data) => {
-    
+
     const text = clipboard.readText();
     if (text === lastCopiedText) return;
     event.sender.send(CHANNELS.copyTextReply, text);
-    
+
     lastCopiedText = text;
-    console.log('🍎🍎🍎',lastCopiedText)
-    
+    console.log('🍎🍎🍎', lastCopiedText)
+
     if (pages.homeWindow === null) {
       initHomePageSetting(pages);
-    } else {
-      pages.homeWindow.focus();
     }
   });
 
@@ -215,7 +221,7 @@ app.whenReady().then(() => {
   pages.floatingWindow = createFloatingWindow();
 
   // TODO: debug mode
-  // pages.homeWindow.webContents.openDevTools({ mode: "detach" });
+  pages.homeWindow.webContents.openDevTools({ mode: "detach" });
   // pages.floatingWindow.webContents.openDevTools({ mode: "detach" });
 
   ipcMain.on(CHANNELS.suspensionWindowMove, (event, message) => {
