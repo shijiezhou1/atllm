@@ -1,4 +1,4 @@
-import { CHANNELS } from "@/utils/constants";
+import { CHANNELS } from "@/renderer/src/utils/constants";
 import {
   app,
   shell,
@@ -8,7 +8,7 @@ import {
   Menu,
   clipboard,
 } from "electron";
-import { join } from "path";
+import path, { join } from "path";
 const { electronApp, optimizer, is } = require("@electron-toolkit/utils");
 
 if (process.platform === 'darwin') {
@@ -28,29 +28,32 @@ let lastCopiedText = '';
 
 const createWindow = () => {
   const win = new BrowserWindow({
-    width: 500,
-    height: 600,
+    width: 600,
+    height: 700,
     webPreferences: {
       nodeIntegration: true,
-      contextIsolation: true,
+      contextIsolation: false,
       enableRemoteModule: true,
-      webSecurity: false,
       preload: join(__dirname, "../preload/index.mjs"),
-      sandbox: false,
-      // allowRunningInsecureContent: false,
+      webSecurity: false,
+      sandbox: false
     },
   });
 
   console.log({
-    rendererindexhtml: join(__dirname, "../index.html"),
+    rendererindexhtml: join(__dirname),
     ELECTRON_RENDERER_URL: process.env["ELECTRON_RENDERER_URL"],
+    a:Math.random(),
+    pathjoin: path.join(__dirname),
+    isDev:is.dev
   });
 
   if (is.dev && process.env["ELECTRON_RENDERER_URL"]) {
     win.loadURL(process.env["ELECTRON_RENDERER_URL"] + "/workspace/test");
   } else {
-    // win.loadFile("./dist/_index.html");
-    win.loadFile(join(__dirname, "../index.html"));
+    win.loadFile(join(__dirname, "../renderer/index.html"), {
+      hash: "/workspace/test",
+    });
   }
 
   return win;
@@ -70,15 +73,15 @@ const createFloatingWindow = () => {
     resizable: false,
     transparent: true,
     alwaysOnTop: true,
-    show: false,
+    sandbox: false,
     ...(process.platform === "linux" ? { icon } : {}),
     webPreferences: {
       nodeIntegration: true,
-      contextIsolation: true,
+      contextIsolation: false,
       enableRemoteModule: true,
       webSecurity: false,
       preload: join(__dirname, "../preload/index.mjs"),
-      sandbox: false,
+      sandbox: false
     },
   });
 
@@ -97,9 +100,11 @@ const createFloatingWindow = () => {
   if (is.dev && process.env["ELECTRON_RENDERER_URL"]) {
     win.loadURL(process.env["ELECTRON_RENDERER_URL"] + "/floatingball");
   } else {
-    // win.loadFile("./dist/_index.html");
-    win.loadFile(join(__dirname, "../renderer/index.html"));
+    win.loadFile(join(__dirname, "../renderer/index.html"), {
+      hash: "/floatingball",
+    });
   }
+
 
   const { left, top } = {
     left: screen.getPrimaryDisplay().workAreaSize.width - 150,
@@ -111,19 +116,25 @@ const createFloatingWindow = () => {
   return win;
 };
 
+const showHomeWindow = () => {
+  try {
+    pages.homeWindow?.show();
+    pages.homeWindow?.focus();
+  } catch (error) {
+    console.error({error})
+  }
+}
+
 const initHomePageSetting = (pages) => {
   pages.homeWindow = createWindow();
-  pages.homeWindow.show();
-  pages.homeWindow.focus();
+  showHomeWindow()
 
   ipcMain.on(CHANNELS.focusHomeWindow, () => {
-    pages.homeWindow.show();
-    pages.homeWindow.focus();
+    showHomeWindow()
   })
 
   ipcMain.on(CHANNELS.navigateTo, (event, {route}) => {
-    pages.homeWindow.show();
-    pages.homeWindow.focus();
+    showHomeWindow()
 
     let currentURL = pages.homeWindow.webContents.getURL();
     // console.log({ currentURL });
@@ -135,12 +146,13 @@ const initHomePageSetting = (pages) => {
       return
     }
 
+
     if (is.dev && process.env["ELECTRON_RENDERER_URL"]) {
       pages.homeWindow.loadURL(
         `${process.env["ELECTRON_RENDERER_URL"]}${route}`
       );
     } else {
-      pages.homeWindow.loadFile(path.join(__dirname, "../index.html"), {
+      pages.homeWindow.loadFile(join(__dirname, "../index.html"), {
         hash: route,
       });
     }
@@ -160,10 +172,6 @@ const initHomePageSetting = (pages) => {
             }
           },
         },
-        // {
-        //   label: "上传复制文字",
-        //   click: () => {},
-        // },
         {
           label: "关闭悬浮球",
           click: () => {

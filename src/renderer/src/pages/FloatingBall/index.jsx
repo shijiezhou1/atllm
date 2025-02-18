@@ -79,7 +79,7 @@ export default function FloatingBall() {
     window.electron.ipcRenderer.on(CHANNELS.copyTextReply, async (event, arg) => {
       setIsLoading(true);
       // TODO: make the api call and set back loader after finish
-      console.log({arg});
+      // console.log({arg});
 
       window.localStorage.setItem(CUR_COPY_TEXT, ""); // Clear copy text
 

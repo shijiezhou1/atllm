@@ -280,13 +280,13 @@ export default function PromptInput({
                     setCurCopyText("");
                     window.localStorage.setItem(CUR_COPY_TEXT, "");
                   }}
-                  className="absolute top-0 right-1 text-gray-500 hover:text-gray-700"
+                  className="absolute top-0 right-1 text-gray-500 hover:text-gray-700 text-2xl" // Increased size
                   aria-label="Close"
                 >
                   &times;
                 </button>
                 <div className="text-xs">Text from your copied: </div>
-                <div className="text-gray-400 text-xs">{curCopyText}</div>
+                <div className="text-gray-400 text-xs line-clamp-3">{curCopyText}</div>
               </div>
             )}
             <div className="flex items-center w-full border-b-2 border-theme-chat-input-border">

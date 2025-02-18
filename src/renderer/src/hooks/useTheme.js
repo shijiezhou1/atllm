@@ -1,4 +1,4 @@
-import { REFETCH_LOGO_EVENT } from "@/LogoContext";
+import { REFETCH_LOGO_EVENT } from "../LogoContext";
 import { useState, useEffect } from "react";
 
 const availableThemes = {

@@ -1,7 +1,7 @@
 import React, { lazy, Suspense } from "react";
 import { Routes, Route } from "react-router-dom";
 import { I18nextProvider } from "react-i18next";
-import { ContextWrapper } from "@/AuthContext";
+import { ContextWrapper } from "./AuthContext";
 import PrivateRoute, {
   AdminRoute,
   ManagerRoute,
@@ -13,10 +13,10 @@ import SimpleSSOPassthrough from "@/pages/Login/SSO/simple";
 import OnboardingFlow from "@/pages/OnboardingFlow";
 import i18n from "./i18n";
 
-import { PfpProvider } from "./PfpContext";
-import { LogoProvider } from "./LogoContext";
+import { PfpProvider } from "@/PfpContext";
+import { LogoProvider } from "@/LogoContext";
 import { FullScreenLoader } from "./components/Preloader";
-import { ThemeProvider } from "./ThemeContext";
+import { ThemeProvider } from "@/ThemeContext";
 
 const FloatingBall = lazy(() => import("@/pages/FloatingBall"));
 const Main = lazy(() => import("@/pages/Main"));

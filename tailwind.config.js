@@ -4,13 +4,13 @@ export default {
   content: {
     relative: true,
     files: [
-      "./src/components/**/*.{js,jsx}",
-      "./src/hooks/**/*.js",
-      "./src/models/**/*.js",
-      "./src/pages/**/*.{js,jsx}",
-      "./src/utils/**/*.js",
-      "./src/*.jsx",
-      "./index.html",
+      "./src/renderer/src/components/**/*.{js,jsx}",
+      "./src/renderer/src/hooks/**/*.js",
+      "./src/renderer/src/models/**/*.js",
+      "./src/renderer/src/pages/**/*.{js,jsx}",
+      "./src/renderer/src/utils/**/*.js",
+      "./src/renderer/src/*.jsx",
+      "./src/renderer/index.html",
       "./node_modules/@tremor/**/*.{js,ts,jsx,tsx}"
     ]
   },

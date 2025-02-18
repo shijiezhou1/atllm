@@ -176,7 +176,7 @@ export default function ChatHistory({
 
   return (
     <div
-      className={`markdown text-white/80 light:text-theme-text-primary font-light ${textSizeClass} h-full md:h-[83%] pb-[100px] pt-6 md:pt-0 md:pb-20 md:mx-0 overflow-y-scroll flex flex-col justify-start ${
+      className={`markdown text-white/80 light:text-theme-text-primary font-light ${textSizeClass} h-[calc(100%-100px)] md:h-[calc(83%-100px)] pb-[100px] pt-6 md:pt-0 md:pb-20 md:mx-0 overflow-y-scroll flex flex-col justify-start ${
         showScrollbar ? "show-scrollbar" : "no-scroll"
       }`}
       id="chat-history"

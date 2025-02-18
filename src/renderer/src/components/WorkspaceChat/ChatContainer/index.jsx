@@ -19,6 +19,7 @@ import SpeechRecognition, {
 } from "react-speech-recognition";
 import { ChatTooltips } from "./ChatTooltips";
 import { MetricsProvider } from "./ChatHistory/HistoricalMessage/Actions/RenderMetrics";
+import { CUR_COPY_TEXT } from "@/utils/constants";
 
 export default function ChatContainer({ workspace, knownHistory = [] }) {
   const { threadSlug = null } = useParams();
@@ -50,6 +51,13 @@ export default function ChatContainer({ workspace, knownHistory = [] }) {
   const handleSubmit = async (event) => {
     event.preventDefault();
     if (!message || message === "") return false;
+
+    let assistantContent = ""
+    if (window.localStorage.getItem(CUR_COPY_TEXT)) {
+      assistantContent = window.localStorage.getItem(CUR_COPY_TEXT) + "\n\n"
+    }
+    // console.log({assistantContent});
+
     const prevChatHistory = [
       ...chatHistory,
       {
@@ -61,7 +69,7 @@ export default function ChatContainer({ workspace, knownHistory = [] }) {
         content: "",
         role: "assistant",
         pending: true,
-        userMessage: message,
+        userMessage: assistantContent + message,
         animate: true,
       },
     ];

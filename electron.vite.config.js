@@ -10,15 +10,13 @@ import { visualizer } from "rollup-plugin-visualizer"
 
 dns.setDefaultResultOrder("verbatim")
 
-console.log("directory name: ")
+console.log("__dirname: ")
 console.log(__dirname)
-
-console.log(resolve(__dirname, "index.html"))
 
 export default defineConfig({
   main: {
     // vite config options
-    plugins: [react(),externalizeDepsPlugin()],
+    plugins: [externalizeDepsPlugin()],
     build: {
       rollupOptions: {
         input: {
@@ -48,9 +46,6 @@ export default defineConfig({
           replacement: fileURLToPath(new URL("./src", import.meta.url))
         },
         {
-          "@renderer": resolve("src/renderer/src")
-        },
-        {
           process: "process/browser",
           stream: "stream-browserify",
           zlib: "browserify-zlib",
@@ -65,7 +60,7 @@ export default defineConfig({
   },
   preload: {
     // vite config options
-    plugins: [react(),externalizeDepsPlugin()],
+    plugins: [externalizeDepsPlugin()],
     build: {
       rollupOptions: {
         input: {
@@ -77,8 +72,7 @@ export default defineConfig({
         //   format: "cjs" // Use CommonJS format for `.js` output
         // },
         external: [
-          "@electron-toolkit/preload",
-          "/@phosphor-icons/react/dist/ssr/"
+          "@electron-toolkit/preload"
         ]
       },
       commonjsOptions: {
@@ -100,12 +94,11 @@ export default defineConfig({
   },
   renderer: {
     // vite config options,
-    root: ".",
-    plugins: [react(),externalizeDepsPlugin()],
+    plugins: [react()],
     build: {
       rollupOptions: {
         input: {
-          index: resolve(__dirname, "index.html")
+          index: resolve(__dirname, "src/renderer/index.html")
         },
         output: {
           inlineDynamicImports: true
@@ -138,7 +131,7 @@ export default defineConfig({
       alias: [
         {
           find: "@",
-          replacement: fileURLToPath(new URL("./src", import.meta.url))
+          replacement: resolve('src/renderer/src')
         },
         {
           process: "process/browser",
